@@ -65,6 +65,7 @@ ENV HOME=/paperclip \
     OPENCODE_ALLOW_ALL_MODELS=true \
     GEMINI_SANDBOX=false
 
+# mariadb-client: lets agents query the non-prod MySQL database (read-only user).
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -72,6 +73,7 @@ RUN apt-get update \
     git \
     jq \
     openssh-client \
+    mariadb-client \
     ripgrep \
     tini \
     && rm -rf /var/lib/apt/lists/*
@@ -110,4 +112,3 @@ EXPOSE 3100
 # exhausted and every fork() in the container fails.
 ENTRYPOINT ["/usr/bin/tini", "--", "/wrapper/entrypoint.sh"]
 CMD ["node", "/wrapper/src/server.js"]
-

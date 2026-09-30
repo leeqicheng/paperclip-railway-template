@@ -100,6 +100,11 @@ RUN npm install --global --omit=dev \
     opencode-ai@1.18.32 \
     @google/gemini-cli@0.60.0
 RUN npm install --global --omit=dev tsx@4.23.15
+# Headless Chromium + Playwright so agents can view pages and take screenshots.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN npm install --global playwright@1.63.0 \
+    && npx -y playwright@1.63.0 install --with-deps chromium \
+    && chmod -R a+rx /ms-play weight
 RUN mkdir -p /paperclip \
     && chown -R node:node /app /paperclip /wrapper
 

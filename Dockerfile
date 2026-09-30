@@ -105,6 +105,7 @@ RUN npm install --global --omit=dev tsx@4.23.15
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 WORKDIR /opt/agent-tools
 COPY scripts/shot.mjs /opt/agent-tools/shot.mjs
+COPY scripts/session.mjs /opt/agent-tools/session.mjs
 RUN npm init -y >/dev/null \
     && npm install playwright@1.63.0 \
     && npx playwright install --with-deps chromium \

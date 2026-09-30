@@ -73,6 +73,7 @@ RUN apt-get update \
     git \
     jq \
     openssh-client \
+    gh \
     mariadb-client \
     ripgrep \
     tini \

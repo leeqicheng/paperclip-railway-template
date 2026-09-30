@@ -101,10 +101,15 @@ RUN npm install --global --omit=dev \
     @google/gemini-cli@0.60.0
 RUN npm install --global --omit=dev tsx@4.23.15
 # Headless Chromium + Playwright so agents can view pages and take screenshots.
+# Headless Chromium + Playwright + screenshot helper for agents.
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-RUN npm install --global playwright@1.63.0 \
-    && npx -y playwright@1.63.0 install --with-deps chromium \
-    && chmod -R a+rx /ms-play weight
+WORKDIR /opt/agent-tools
+COPY scripts/shot.mjs /opt/agent-tools/shot.mjs
+RUN npm init -y >/dev/null \
+    && npm install playwright@1.63.0 \
+    && npx playwright install --with-deps chromium \
+    && chmod -R a+rx /opt/agent-tools /ms-playwright
+
 RUN mkdir -p /paperclip \
     && chown -R node:node /app /paperclip /wrapper
 

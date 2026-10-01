@@ -110,6 +110,7 @@ RUN npm init -y >/dev/null \
     && npm install playwright@1.63.0 \
     && npx playwright install --with-deps chromium \
     && chmod -R a+rx /opt/agent-tools /ms-playwright
+RUN npm install -g @railway/cli
 
 RUN mkdir -p /paperclip \
     && chown -R node:node /app /paperclip /wrapper

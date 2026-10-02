@@ -34,7 +34,7 @@ RUN set -eux; \
     rm /tmp/rustup-init
 
 ARG PAPERCLIP_REPO=https://github.com/paperclipai/paperclip.git
-ARG PAPERCLIP_REF=v2026.916.1
+ARG PAPERCLIP_REF=v2026.1001.0
 
 WORKDIR /paperclip
 RUN git clone --depth 1 --branch "${PAPERCLIP_REF}" "${PAPERCLIP_REPO}" .
@@ -107,7 +107,7 @@ WORKDIR /opt/agent-tools
 COPY scripts/shot.mjs /opt/agent-tools/shot.mjs
 COPY scripts/session.mjs /opt/agent-tools/session.mjs
 RUN npm init -y >/dev/null \
-    && npm install playwright@1.63.0 \
+    && npm install playwright@1.63.0 @axe-core/playwright@4 \
     && npx playwright install --with-deps chromium \
     && chmod -R a+rx /opt/agent-tools /ms-playwright
 RUN npm install -g @railway/cli

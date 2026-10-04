@@ -1,12 +1,12 @@
-!/usr/bin/env python3
+#!/usr/bin/env python3
 """SubRouter spend report for an agent: read-only, prints to stdout, no server.
- 
+
     export SUBROUTER_ACCESS_TOKEN="..."   # system access token from Personal Settings (not an sk- key)
     export SUBROUTER_USER_ID="..."        # numeric user id
     python3 subrouter_costs.py                 # month to date (UTC), JSON
     python3 subrouter_costs.py --days 7        # last 7 days
     python3 subrouter_costs.py --format md     # markdown tables instead of JSON
- 
+
 It only sends GET requests. It never creates, changes or deletes keys or subscriptions,
 and it never prints the token or any sk- key value.
 Exit codes: 0 ok, 2 missing configuration, 1 SubRouter error.
@@ -22,18 +22,18 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
- 
+
 BASE = os.environ.get("SUBROUTER_BASE_URL", "https://subrouter.ai").rstrip("/")
 TOKEN = os.environ.get("SUBROUTER_ACCESS_TOKEN", "").strip()
 USER_ID = os.environ.get("SUBROUTER_USER_ID", "").strip()
 MAX_DAYS = 30          # the usage endpoint refuses longer ranges
 PAGE_SIZE = 100
- 
- 
+
+
 class ApiError(Exception):
     pass
- 
- 
+
+
 def get(path, params=None, auth=True):
     url = BASE + path
     if params:
@@ -58,16 +58,16 @@ def get(path, params=None, auth=True):
     if isinstance(payload, dict) and (payload.get("success") is False or payload.get("message") == "error"):
         raise ApiError("%s failed: %s" % (path, payload.get("message") or payload.get("data") or "unknown error"))
     return payload
- 
- 
+
+
 def num(v):
     try:
         f = float(v)
         return f if math.isfinite(f) else None
     except (TypeError, ValueError):
         return None
- 
- 
+
+
 def items_of(payload):
     d = payload.get("data") if isinstance(payload, dict) else payload
     if isinstance(d, dict):
@@ -76,8 +76,8 @@ def items_of(payload):
                 return d[k]
         return []
     return d if isinstance(d, list) else []
- 
- 
+
+
 def window(days):
     """Return (start, end, label). days=None means the current calendar month in UTC."""
     end = int(time.time())
@@ -88,8 +88,8 @@ def window(days):
         return max(start, floor), end, "month to date (UTC)"
     days = max(1, min(MAX_DAYS, days))
     return max(end - days * 86400 + 60, floor), end, "last %d days" % days
- 
- 
+
+
 def spend_by_model(start, end, qpu):
     by_model = {}
     for r in items_of(get("/api/data/self", {"start_timestamp": start, "end_timestamp": end})):
@@ -104,8 +104,8 @@ def spend_by_model(start, end, qpu):
     for a in rows:
         a["usd"] = round(a["usd"], 4)
     return rows
- 
- 
+
+
 def keys(qpu):
     """Lifetime spend per API key. Key values are deliberately left out."""
     out, seen = [], set()
@@ -123,8 +123,8 @@ def keys(qpu):
         if len(items) < PAGE_SIZE or not fresh:
             break
     return sorted(out, key=lambda k: -k["used_usd_lifetime"])
- 
- 
+
+
 def report(days):
     status = get("/api/status", auth=False).get("data") or {}
     qpu = num(status.get("quota_per_unit")) or 500000.0
@@ -156,8 +156,8 @@ def report(days):
     if warnings:
         out["warnings"] = warnings
     return out
- 
- 
+
+
 def markdown(r):
     lines = ["# SubRouter spend, %s" % r["period"], "",
              "%s to %s UTC" % (r["start_utc"], r["end_utc"]), "",
@@ -180,8 +180,8 @@ def markdown(r):
     for w in r.get("warnings", []):
         lines += ["", "Warning: %s" % w]
     return "\n".join(lines)
- 
- 
+
+
 def main():
     ap = argparse.ArgumentParser(description="Read-only SubRouter spend report.")
     ap.add_argument("--days", type=int, default=None, help="look back this many days (1-30); default is month to date")
@@ -197,8 +197,7 @@ def main():
         return 1
     print(markdown(r) if args.format == "md" else json.dumps(r, indent=1))
     return 0
- 
- 
+
+
 if __name__ == "__main__":
     sys.exit(main())
- 

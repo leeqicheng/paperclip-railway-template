@@ -75,6 +75,7 @@ RUN apt-get update \
     openssh-client \
     gh \
     mariadb-client \
+    python3 \
     ripgrep \
     tini \
     && rm -rf /var/lib/apt/lists/*
@@ -106,6 +107,8 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 WORKDIR /opt/agent-tools
 COPY scripts/shot.mjs /opt/agent-tools/shot.mjs
 COPY scripts/session.mjs /opt/agent-tools/session.mjs
+COPY scripts/subrouter_costs.py /opt/agent-tools/subrouter_costs.py
+RUN ln -s /opt/agent-tools/subrouter_costs.py /usr/local/bin/subrouter-costs
 RUN npm init -y >/dev/null \
     && npm install playwright@1.63.0 @axe-core/playwright@4 \
     && npx playwright install --with-deps chromium \

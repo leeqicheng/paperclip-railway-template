@@ -3,7 +3,14 @@ set -e
 # When Railway mounts a volume at /paperclip it is often not writable by the node user.
 # Create dirs Paperclip needs and ensure the whole tree is owned by node.
 mkdir -p /paperclip/instances/default/logs
-chown -R node:node /paperclip
+# Only walk the whole volume when its root is not already owned by node (e.g. a fresh
+# root-owned mount). Recursing over a ~100 GB volume on every start takes several
+# minutes and exceeds the Railway healthcheck window.
+if [ "$(stat -c %U /paperclip)" != "node" ]; then
+  chown -R node:node /paperclip
+else
+  chown node:node /paperclip /paperclip/instances /paperclip/instances/default /paperclip/instances/default/logs 2>/dev/null || true
+fi
 
 # ---------- Fix for GitHub issue #4 ----------
 # Claude Code refuses --dangerously-skip-permissions when it detects
